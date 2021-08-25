@@ -70,11 +70,11 @@ export class World<C extends Component> {
     );
   }
 
-  public run(dt: number) {
+  public run = (dt: number) => {
     for (const system of this.systems) {
       system.run(this, dt);
     }
-  }
+  };
 
   public tearDown() {
     for (const system of this.systems) {

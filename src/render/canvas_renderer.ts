@@ -1,4 +1,4 @@
-import { Renderer } from '../core/types';
+import { Renderer, TearDown } from '../core/types';
 
 export enum CanvasType {
   CPU = '2d',
@@ -15,7 +15,7 @@ export interface RenderPayload {
   batches: Map<string, number[]>;
 }
 
-export abstract class CanvasRenderer<K extends CanvasType> implements Renderer<RenderPayload> {
+export abstract class CanvasGridRenderer<K extends CanvasType> implements Renderer<RenderPayload>, TearDown {
   public readonly canvas: HTMLCanvasElement;
   public readonly canvasContext: RenderingContextMap[K];
 
@@ -32,6 +32,10 @@ export abstract class CanvasRenderer<K extends CanvasType> implements Renderer<R
   }
 
   public abstract render(data: RenderPayload): void;
+
+  public tearDown(): void {
+    this.canvas.remove();
+  }
 }
 
 interface Cell {
@@ -41,7 +45,7 @@ interface Cell {
   w: number,
 }
 
-export class Canvas2DRenderer extends CanvasRenderer<CanvasType.CPU> {
+export class Canvas2DGridRenderer extends CanvasGridRenderer<CanvasType.CPU> {
   constructor(container: HTMLElement) {
     super(container, CanvasType.CPU);
   }
@@ -75,9 +79,10 @@ export class Canvas2DRenderer extends CanvasRenderer<CanvasType.CPU> {
       x: column * cellSize,
     }
   }
+
 }
 
-export class CanvasWebGL2Renderer extends CanvasRenderer<CanvasType.WEBGL2> {
+export class CanvasWebGL2GridRenderer extends CanvasGridRenderer<CanvasType.WEBGL2> {
   constructor(container: HTMLElement) {
     super(container, CanvasType.WEBGL2);
   }

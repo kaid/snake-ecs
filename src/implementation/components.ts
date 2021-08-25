@@ -7,7 +7,7 @@ export class Color extends Component {
 }
 
 export class Position extends Component {
-  constructor(public readonly positions: number[]) {
+  constructor(public readonly cells: number[]) {
     super();
   }
 }

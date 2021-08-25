@@ -7,3 +7,7 @@ export interface Class<T> extends Function {
 export interface Renderer<D> {
   render(data: D): void;
 }
+
+export interface TearDown {
+  tearDown(): void;
+}

@@ -1,5 +1,6 @@
 import { range } from 'ramda';
 
+import { randomFor } from '../utils';
 import { Entity } from '../core/entity';
 import {
   Color,
@@ -10,7 +11,6 @@ import {
   Position, Static,
   Velocity,
 } from './components';
-import { randomFor } from '../utils';
 
 export class Obstacle extends Entity<Position | Color | Static> {
   constructor(boardSize: number) {

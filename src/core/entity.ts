@@ -16,8 +16,8 @@ export class Entity<C extends Component> {
     }
   }
 
-  public get(componentClass: Class<C>): C | undefined {
-    return this.components.get(componentClass);
+  public get(componentClass: Class<C>): C {
+    return this.components.get(componentClass)!;
   }
 
   public add(component: C): void {

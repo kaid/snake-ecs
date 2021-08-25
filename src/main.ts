@@ -1,29 +1,12 @@
 import './style.css';
+import { Game } from './core/game';
 import { World } from './core/world';
-import { Component} from './core/component';
+import { Canvas2DGridRenderer } from './render/canvas_renderer';
 import { Food, Obstacle, Snake } from './implementation/entities';
-import { Canvas, InputHandler, Movement } from './implementation/systems';
-import { Color, Direction, Position, Velocity, Moving } from './implementation/components';
-
-const makeLoop = (world: World<Component>) => {
-  const loopContext = { last: -1, loopId: -1 };
-
-  const loop = (dt: number) => {
-    if (loopContext.last < 0 || dt - loopContext.last >= 160) {
-      world.run(dt);
-      loopContext.last = dt;
-    }
-
-    loopContext.loopId = requestAnimationFrame(loop);
-
-    return () => {
-      cancelAnimationFrame(loopContext.loopId);
-      world.tearDown();
-    }
-  }
-
-  return { loop, loopContext };
-}
+import { MovementSystem } from './implementation/systems/movement_system';
+import { UserInputSystem } from './implementation/systems/user_input_system';
+import { CanvasRenderingSystem } from './implementation/systems/canvas_rendering_system';
+import { Color, Direction, Moving, Position, Velocity } from './implementation/components';
 
 type ComponentUnion = Position | Color | Direction | Velocity | Moving;
 
@@ -31,10 +14,12 @@ const setupWorld = () => {
   const boardSize = 64;
 
   const world = new World<ComponentUnion>(
-    new InputHandler(),
-
-    new Movement(boardSize),
-    new Canvas(boardSize),
+    new UserInputSystem(),
+    new MovementSystem(boardSize),
+    new CanvasRenderingSystem(
+      boardSize,
+      new Canvas2DGridRenderer(document.querySelector('#app')!),
+    ),
   );
 
   world.addEntity(new Obstacle(boardSize));
@@ -44,20 +29,32 @@ const setupWorld = () => {
   return world;
 };
 
-const Bootstrap = () => {
-  const { loop } = makeLoop(setupWorld());
-  const tearDown = loop(performance.now());
+const Main = () => {
+  const world = setupWorld();
+
+  const game = new Game(
+    160,
+    world.run,
+    ({ loopId }) => {
+      cancelAnimationFrame(loopId);
+      world.tearDown();
+    }
+  );
 
   document.addEventListener('keydown', event => {
-    if (event.code === 'Escape') {
-      const shouldRestart = confirm('是否重开？');
+    if (event.code !== 'Escape') {
+      return;
+    }
 
-      if (shouldRestart) {
-        tearDown();
-        Bootstrap();
-      }
+    const shouldRestart = confirm('是否重开？');
+
+    if (shouldRestart) {
+      game.tearDown();
+      game.start();
     }
   });
+
+  game.start();
 };
 
-Bootstrap();
+Main();
